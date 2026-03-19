@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>উত্তরাধিকার জমি ক্যালকুলেটর</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Hind Siliguri', sans-serif; background: #f4f4f4; min-height: 100vh; display: flex; justify-content: center; }
+  :root {
+    --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #085041;
+    --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #633806;
+    --red: #A32D2D; --red-light: #FCEBEB;
+    --blue: #185FA5; --blue-light: #E6F1FB;
+    --gray: #F1EFE8; --gray-mid: #888780; --gray-dark: #2C2C2A;
+    --bg: #ffffff; --bg2: #f8f8f6; --border: rgba(0,0,0,0.12);
+    --text: #1a1a1a; --text2: #555; --text3: #999;
+  }
+  .app { max-width: 430px; width: 100%; min-height: 100vh; background: var(--bg); box-shadow: 0 0 30px rgba(0,0,0,0.1); }
+  .header { background: var(--green); color: white; padding: 20px 16px 16px; text-align: center; border-radius: 0 0 20px 20px; }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.3px; }
+  .header p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+  .tabs { display: flex; margin: 16px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--bg2); }
+  .tab { flex: 1; padding: 10px 4px; font-size: 13px; text-align: center; cursor: pointer; color: var(--text2); transition: all 0.2s; border: none; background: transparent; font-family: 'Hind Siliguri', sans-serif; }
+  .tab.active { background: var(--green); color: white; font-weight: 600; }
+  .content { padding: 0 16px 24px; }
+  .section-title { font-size: 14px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 10px; }
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .input-row:last-child { margin-bottom: 0; }
+  .input-row label { font-size: 14px; color: var(--text); flex: 1; }
+  .input-row input, .input-row select { width: 140px; height: 36px; border: 0.5px solid var(--border); border-radius: 8px; padding: 0 10px; font-size: 14px; background: var(--bg2); color: var(--text); text-align: right; font-family: 'Hind Siliguri', sans-serif; }
+  .input-row input:focus, .input-row select:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 2px rgba(29,158,117,0.18); }
+  .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: all 0.15s; font-family: 'Hind Siliguri', sans-serif; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-secondary { background: var(--bg2); color: var(--text); border: 0.5px solid var(--border); margin-top: 10px; }
+  .result-card { border-radius: 12px; border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 12px; }
+  .result-header { background: var(--green); color: white; padding: 12px 16px; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  .result-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 16px; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+  .result-row:last-child { border-bottom: none; }
+  .result-label { color: var(--text2); }
+  .result-value { font-weight: 600; color: var(--text); }
+  .result-value.highlight { color: var(--green); font-size: 16px; }
+  .share-badge { display: inline-block; background: var(--green-light); color: var(--green-dark); font-size: 12px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+  .info-box { background: var(--blue-light); border-left: 3px solid var(--blue); border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.6; }
+  .warning-box { background: var(--amber-light); border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; padding: 10px 14px; font-size: 13px; color: var(--amber-dark); margin-bottom: 12px; line-height: 1.6; }
+  .heirs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+  .heir-toggle { border: 0.5px solid var(--border); border-radius: 10px; padding: 10px 8px; cursor: pointer; text-align: center; transition: all 0.15s; background: var(--bg2); }
+  .heir-toggle.selected { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+  .heir-toggle .icon { font-size: 20px; margin-bottom: 4px; }
+  .heir-toggle .name { font-size: 13px; font-weight: 600; }
+  .heir-toggle .sub { font-size: 11px; color: var(--gray-mid); }
+  .heir-toggle.selected .sub { color: var(--green); }
+  .counter-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .counter-row:last-child { border-bottom: none; }
+  .counter-controls { display: flex; align-items: center; gap: 8px; }
+  .counter-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--bg2); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); line-height: 1; font-family: 'Hind Siliguri', sans-serif; }
+  .counter-val { font-size: 16px; font-weight: 700; min-width: 24px; text-align: center; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text2); }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .summary-bar { background: var(--gray); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; margin-bottom: 16px; }
+  .summary-item { text-align: center; }
+  .summary-item .val { font-size: 16px; font-weight: 700; color: var(--green); }
+  .summary-item .lbl { font-size: 11px; color: var(--gray-mid); margin-top: 2px; }
+  .pie-wrap { display: flex; justify-content: center; margin: 12px 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .tab-icon { display: block; font-size: 16px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>উত্তরাধিকার জমি ক্যালকুলেটর</h1>
+    <p>ইসলামি শরিয়াহ আইন অনুযায়ী</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showScreen('input')"><span class="tab-icon">📋</span>তথ্য দিন</button>
+    <button class="tab" onclick="showScreen('heirs')"><span class="tab-icon">👨‍👩‍👧‍👦</span>ওয়ারিশ</button>
+    <button class="tab" onclick="showScreen('result')"><span class="tab-icon">📊</span>ফলাফল</button>
+    <button class="tab" onclick="showScreen('guide')"><span class="tab-icon">📖</span>নির্দেশিকা</button>
+  </div>
+
+  <!-- SCREEN 1: INPUT -->
+  <div class="screen active content" id="screen-input">
+    <div class="section-title">সম্পত্তির তথ্য</div>
+    <div class="card">
+      <div class="input-row">
+        <label>মোট জমির পরিমাণ</label>
+        <input type="number" id="totalLand" value="" placeholder="০" min="0" step="0.01" oninput="updateSummary()">
+      </div>
+      <div class="input-row">
+        <label>পরিমাপের একক</label>
+        <select id="landUnit" onchange="updateSummary()">
+          <option value="শতক">শতক</option>
+          <option value="বিঘা">বিঘা</option>
+          <option value="একর">একর</option>
+          <option value="কাঠা">কাঠা</option>
+          <option value="ডেসিমাল">ডেসিমাল</option>
+          <option value="গণ্ডা">গণ্ডা</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label>আনুমানিক মূল্য (টাকা)</label>
+        <input type="number" id="landValue" value="" placeholder="০" min="0" step="1000" oninput="updateSummary()">
+      </div>
+    </div>
+
+    <div class="section-title">মৃত ব্যক্তির তথ্য</div>
+    <div class="card">
+      <div class="input-row">
+        <label>মৃত ব্যক্তির নাম</label>
+        <input type="text" id="deceasedName" placeholder="নাম লিখুন" style="text-align:left; width:160px;">
+      </div>
+      <div class="input-row">
+        <label>মৃত ব্যক্তির লিঙ্গ</label>
+        <select id="deceasedGender">
+          <option value="male">পুরুষ</option>
+          <option value="female">মহিলা</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-title">দেনা-পাওনা (যদি থাকে)</div>
+    <div class="card">
+      <div class="input-row">
+        <label>দাফন/কাফনের খরচ</label>
+        <input type="number" id="funeralCost" value="" placeholder="০" min="0">
+      </div>
+      <div class="input-row">
+        <label>ঋণ (টাকা)</label>
+        <input type="number" id="debt" value="" placeholder="০" min="0">
+      </div>
+      <div class="input-row">
+        <label>অসিয়ত (১/৩ এর বেশি নয়)</label>
+        <input type="number" id="wasiyah" value="" placeholder="০" min="0">
+      </div>
+    </div>
+
+    <div id="summary-bar-wrap" style="display:none;">
+      <div class="summary-bar">
+        <div class="summary-item"><div class="val" id="sum-land">০</div><div class="lbl">মোট জমি</div></div>
+        <div class="summary-item"><div class="val" id="sum-net">৳০</div><div class="lbl">বিতরণযোগ্য</div></div>
+        <div class="summary-item"><div class="val" id="sum-heirs">০</div><div class="lbl">ওয়ারিশ</div></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="showScreen('heirs')">পরবর্তী: ওয়ারিশ নির্বাচন করুন →</button>
+  </div>
+
+  <!-- SCREEN 2: HEIRS -->
+  <div class="screen content" id="screen-heirs">
+    <div class="info-box">ওয়ারিশ নির্বাচন করুন এবং সংখ্যা নির্ধারণ করুন।</div>
+
+    <div class="section-title">স্বামী/স্ত্রী</div>
+    <div class="card">
+      <div class="heirs-grid">
+        <div class="heir-toggle" id="tog-husband" onclick="toggleHeir('husband')">
+          <div class="icon">👨</div>
+          <div class="name">স্বামী</div>
+          <div class="sub">husband</div>
+        </div>
+        <div class="heir-toggle" id="tog-wife" onclick="toggleHeir('wife')">
+          <div class="icon">👩</div>
+          <div class="name">স্ত্রী</div>
+          <div class="sub">wife (১-৪ জন)</div>
+        </div>
+      </div>
+      <div id="wife-count-row" style="display:none; padding-top:8px;">
+        <div class="counter-row">
+          <span style="font-size:14px;">স্ত্রীর সংখ্যা</span>
+          <div class="counter-controls">
+            <button class="counter-btn" onclick="changeCount('wife',-1)">−</button>
+            <span class="counter-val" id="cnt-wife">১</span>
+            <button class="counter-btn" onclick="changeCount('wife',1)">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">পিতা-মাতা</div>
+    <div class="card">
+      <div class="heirs-grid">
+        <div class="heir-toggle" id="tog-father" onclick="toggleHeir('father')">
+          <div class="icon">👴</div>
+          <div class="name">পিতা</div>
+          <div class="sub">father</div>
+        </div>
+        <div class="heir-toggle" id="tog-mother" onclick="toggleHeir('mother')">
+          <div class="icon">👵</div>
+          <div class="name">মাতা</div>
+          <div class="sub">mother</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">সন্তান</div>
+    <div class="card">
+      <div class="counter-row">
+        <span style="font-size:14px;">পুত্র সংখ্যা</span>
+        <div class="counter-controls">
+          <button class="counter-btn" onclick="changeCount('son',-1)">−</button>
+          <span class="counter-val" id="cnt-son">০</span>
+          <button class="counter-btn" onclick="changeCount('son',1)">+</button>
+        </div>
+      </div>
+      <div class="counter-row">
+        <span style="font-size:14px;">কন্যা সংখ্যা</span>
+        <div class="counter-controls">
+          <button class="counter-btn" onclick="changeCount('daughter',-1)">−</button>
+          <span class="counter-val" id="cnt-daughter">০</span>
+          <button class="counter-btn" onclick="changeCount('daughter',1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">ভাই-বোন (সহোদর)</div>
+    <div class="card">
+      <div class="counter-row">
+        <span style="font-size:14px;">ভাই (সহোদর)</span>
+        <div class="counter-controls">
+          <button class="counter-btn" onclick="changeCount('brother',-1)">−</button>
+          <span class="counter-val" id="cnt-brother">০</span>
+          <button class="counter-btn" onclick="changeCount('brother',1)">+</button>
+        </div>
+      </div>
+      <div class="counter-row">
+        <span style="font-size:14px;">বোন (সহোদর)</span>
+        <div class="counter-controls">
+          <button class="counter-btn" onclick="changeCount('sister',-1)">−</button>
+          <span class="counter-val" id="cnt-sister">০</span>
+          <button class="counter-btn" onclick="changeCount('sister',1)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">দাদা-দাদি / নানা-নানি</div>
+    <div class="card">
+      <div class="heirs-grid">
+        <div class="heir-toggle" id="tog-grandfather" onclick="toggleHeir('grandfather')">
+          <div class="icon">🧓</div>
+          <div class="name">দাদা</div>
+          <div class="sub">paternal grandfather</div>
+        </div>
+        <div class="heir-toggle" id="tog-grandmother" onclick="toggleHeir('grandmother')">
+          <div class="icon">👴</div>
+          <div class="name">দাদি/নানি</div>
+          <div class="sub">grandmother</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="calculate()">হিসাব করুন ✓</button>
+    <button class="btn btn-secondary" onclick="showScreen('input')">← পিছনে যান</button>
+  </div>
+
+  <!-- SCREEN 3: RESULT -->
+  <div class="screen content" id="screen-result">
+    <div id="result-content">
+      <div class="empty-state">
+        <div class="empty-icon">📊</div>
+        <p style="font-size:15px; font-weight:600; margin-bottom:8px;">এখনও হিসাব হয়নি</p>
+        <p style="font-size:13px;">তথ্য ও ওয়ারিশ দিয়ে "হিসাব করুন" চাপুন</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: GUIDE -->
+  <div class="screen content" id="screen-guide">
+    <div class="info-box">ইসলামি উত্তরাধিকার আইনের মূল নীতিমালা (ফারায়েজ)</div>
+
+    <div class="section-title">অগ্রাধিকারের ক্রম</div>
+    <div class="card" style="font-size:13px; line-height:1.9; color:var(--text);">
+      ১. দাফন-কাফনের খরচ<br>
+      ২. ঋণ পরিশোধ<br>
+      ৩. অসিয়ত (সম্পত্তির ১/৩ এর বেশি নয়)<br>
+      ৪. অবশিষ্ট সম্পত্তি ওয়ারিশদের মধ্যে বণ্টন
+    </div>
+
+    <div class="section-title">নির্ধারিত অংশ (ফরজ)</div>
+    <div class="card">
+      <div class="result-row"><span class="result-label">স্বামী (সন্তান থাকলে)</span><span class="share-badge">১/৪</span></div>
+      <div class="result-row"><span class="result-label">স্বামী (সন্তান না থাকলে)</span><span class="share-badge">১/২</span></div>
+      <div class="result-row"><span class="result-label">স্ত্রী (সন্তান থাকলে)</span><span class="share-badge">১/৮</span></div>
+      <div class="result-row"><span class="result-label">স্ত্রী (সন্তান না থাকলে)</span><span class="share-badge">১/৪</span></div>
+      <div class="result-row"><span class="result-label">মাতা (সন্তান থাকলে)</span><span class="share-badge">১/৬</span></div>
+      <div class="result-row"><span class="result-label">পিতা (সন্তান না থাকলে)</span><span class="share-badge">১/৩+</span></div>
+      <div class="result-row"><span class="result-label">এক কন্যা (পুত্র না থাকলে)</span><span class="share-badge">১/২</span></div>
+      <div class="result-row"><span class="result-label">দুই বা ততোধিক কন্যা</span><span class="share-badge">২/৩</span></div>
+    </div>
+
+    <div class="section-title">পুত্র:কন্যার অনুপাত</div>
+    <div class="card" style="font-size:13px; color:var(--text2); line-height:1.8;">
+      পুত্র সন্তান থাকলে, পুত্র পাবে কন্যার দ্বিগুণ অংশ।
+      (পুত্র = ২ ভাগ, কন্যা = ১ ভাগ)
+    </div>
+
+    <div class="section-title">বাংলাদেশে প্রযোজ্য আইন</div>
+    <div class="card" style="font-size:13px; color:var(--text2); line-height:1.8;">
+      বাংলাদেশে মুসলিম উত্তরাধিকার আইন ১৯৬১ সালের মুসলিম পারিবারিক আইন অধ্যাদেশ এবং ইসলামি শরিয়াহ অনুযায়ী পরিচালিত হয়।
+    </div>
+
+    <div class="warning-box">⚠️ এই ক্যালকুলেটর শুধুমাত্র সাধারণ গাইডলাইন। জটিল বিষয়ে একজন ইসলামি আইন বিশেষজ্ঞ বা আদালতের পরামর্শ নিন।</div>
+  </div>
+</div>
+
+<script>
+const state = {
+  heirs: { husband:false, wife:false, father:false, mother:false, grandfather:false, grandmother:false },
+  counts: { wife:1, son:0, daughter:0, brother:0, sister:0 }
+};
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const tabs = ['input','heirs','result','guide'];
+  document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active');
+}
+
+function toggleHeir(h) {
+  state.heirs[h] = !state.heirs[h];
+  document.getElementById('tog-'+h).classList.toggle('selected', state.heirs[h]);
+  if(h==='wife') document.getElementById('wife-count-row').style.display = state.heirs.wife ? 'block' : 'none';
+  if(h==='husband' && state.heirs.husband) { state.heirs.wife=false; document.getElementById('tog-wife').classList.remove('selected'); document.getElementById('wife-count-row').style.display='none'; }
+  if(h==='wife' && state.heirs.wife) { state.heirs.husband=false; document.getElementById('tog-husband').classList.remove('selected'); }
+  updateSummary();
+}
+
+function changeCount(type, delta) {
+  const maxes = { wife:4, son:20, daughter:20, brother:20, sister:20 };
+  state.counts[type] = Math.max(0, Math.min(maxes[type], (state.counts[type]||0) + delta));
+  document.getElementById('cnt-'+type).textContent = toBanglaNum(state.counts[type]);
+  updateSummary();
+}
+
+function toBanglaNum(n) {
+  return String(n).replace(/[0-9]/g, d => '০১২৩৪৫৬৭৮৯'[d]);
+}
+
+function formatTaka(n) {
+  if(!n) return '৳০';
+  return '৳' + toBanglaNum(Math.round(n).toLocaleString('en-IN'));
+}
+
+function updateSummary() {
+  const land = parseFloat(document.getElementById('totalLand').value)||0;
+  const unit = document.getElementById('landUnit').value;
+  const val = parseFloat(document.getElementById('landValue').value)||0;
+  const debt = (parseFloat(document.getElementById('debt').value)||0) + (parseFloat(document.getElementById('funeralCost').value)||0) + (parseFloat(document.getElementById('wasiyah').value)||0);
+  const netVal = Math.max(0, val - debt);
+  const totalHeirs = (state.heirs.husband?1:0) + (state.heirs.wife?state.counts.wife:0) + (state.heirs.father?1:0) + (state.heirs.mother?1:0) + state.counts.son + state.counts.daughter + state.counts.brother + state.counts.sister + (state.heirs.grandfather?1:0) + (state.heirs.grandmother?1:0);
+  if(land>0 || val>0) {
+    document.getElementById('summary-bar-wrap').style.display='block';
+    document.getElementById('sum-land').textContent = toBanglaNum(land) + ' ' + unit;
+    document.getElementById('sum-net').textContent = formatTaka(netVal);
+    document.getElementById('sum-heirs').textContent = toBanglaNum(totalHeirs) + ' জন';
+  }
+}
+
+function gcd(a,b){ return b===0?a:gcd(b,a%b); }
+function fraction(n,d){ if(d===0)return '০'; const g=gcd(Math.abs(Math.round(n*1000)),Math.abs(Math.round(d*1000))); return Math.round(n*1000/g)+'/'+Math.round(d*1000/g); }
+
+function calculate() {
+  const land = parseFloat(document.getElementById('totalLand').value)||0;
+  const unit = document.getElementById('landUnit').value;
+  const totalVal = parseFloat(document.getElementById('landValue').value)||0;
+  const funeral = parseFloat(document.getElementById('funeralCost').value)||0;
+  const debt = parseFloat(document.getElementById('debt').value)||0;
+  const wasiyah = parseFloat(document.getElementById('wasiyah').value)||0;
+  const decName = document.getElementById('deceasedName').value || 'মৃত ব্যক্তি';
+
+  const deductions = funeral + debt + wasiyah;
+  const netVal = Math.max(0, totalVal - deductions);
+  const netLand = land > 0 && totalVal > 0 ? land * (netVal / totalVal) : land;
+
+  const hasSon = state.counts.son > 0;
+  const hasDaughter = state.counts.daughter > 0;
+  const hasChild = hasSon || hasDaughter;
+  const hasFather = state.heirs.father;
+  const hasMother = state.heirs.mother;
+  const hasHusband = state.heirs.husband;
+  const hasWife = state.heirs.wife;
+  const wifeCnt = state.counts.wife;
+  const sonCnt = state.counts.son;
+  const dauCnt = state.counts.daughter;
+  const brotherCnt = state.counts.brother;
+  const sisterCnt = state.counts.sister;
+  const hasGF = state.heirs.grandfather;
+  const hasGM = state.heirs.grandmother;
+
+  let shares = {};
+  let remaining = 1.0;
+
+  if(hasHusband) { shares.husband = hasChild ? 1/4 : 1/2; remaining -= shares.husband; }
+  if(hasWife) { shares.wife = hasChild ? 1/8 : 1/4; remaining -= shares.wife; }
+  if(hasMother) { shares.mother = hasChild || brotherCnt+sisterCnt > 1 ? 1/6 : 1/3; remaining -= shares.mother; }
+  if(hasFather) {
+    if(!hasChild) { shares.father = remaining; remaining = 0; }
+    else { shares.father = 1/6; remaining -= 1/6; }
+  }
+  if(hasGF && !hasFather) { const gfShare = Math.min(remaining, !hasChild ? remaining : 1/6); shares.grandfather = gfShare; remaining -= gfShare; }
+  if(hasGM && !hasMother) { const gmShare = Math.min(remaining, 1/6); shares.grandmother = gmShare; remaining -= gmShare; }
+
+  if(hasChild) {
+    const totalUnits = sonCnt * 2 + dauCnt;
+    if(totalUnits > 0) { shares.sonEach = (remaining / totalUnits) * 2; shares.dauEach = remaining / totalUnits; remaining = 0; }
+  } else if(!hasFather && (brotherCnt+sisterCnt>0)) {
+    const totalUnits = brotherCnt * 2 + sisterCnt;
+    if(totalUnits > 0) { shares.brotherEach = (remaining / totalUnits) * 2; shares.sisterEach = remaining / totalUnits; remaining = 0; }
+  }
+
+  if(!hasSon && hasDaughter && hasChild) {
+    delete shares.sonEach;
+    const fShare = hasFather ? 1/6 : 0;
+    const mShare = hasMother ? 1/6 : 0;
+    const spShare = (shares.husband||0) + (shares.wife||0);
+    const dauTotal = Math.max(0, 1 - fShare - mShare - spShare);
+    shares.dauEach = dauTotal / dauCnt;
+  }
+
+  const colors = ['#1D9E75','#185FA5','#BA7517','#A32D2D','#533AB7','#0F6E56','#854F0B','#3B6D11','#993556','#636363'];
+  const rows = [];
+  let ci = 0;
+  const addRow = (label, shareRatio) => {
+    if(shareRatio <= 0) return;
+    rows.push({ label, shareRatio, landAmt: netLand * shareRatio, valAmt: netVal * shareRatio, color: colors[ci++ % colors.length] });
+  };
+
+  if(shares.husband) addRow('স্বামী', shares.husband);
+  if(shares.wife) { for(let i=1;i<=wifeCnt;i++) addRow(wifeCnt>1?`স্ত্রী (${i} নং)`:'স্ত্রী', shares.wife/wifeCnt); }
+  if(shares.father) addRow('পিতা', shares.father);
+  if(shares.mother) addRow('মাতা', shares.mother);
+  if(shares.grandfather) addRow('দাদা', shares.grandfather);
+  if(shares.grandmother) addRow('দাদি/নানি', shares.grandmother);
+  if(shares.sonEach) { for(let i=1;i<=sonCnt;i++) addRow(sonCnt>1?`পুত্র (${i} নং)`:'পুত্র', shares.sonEach); }
+  if(shares.dauEach) { for(let i=1;i<=dauCnt;i++) addRow(dauCnt>1?`কন্যা (${i} নং)`:'কন্যা', shares.dauEach); }
+  if(shares.brotherEach) { for(let i=1;i<=brotherCnt;i++) addRow(`ভাই (${i} নং)`, shares.brotherEach); }
+  if(shares.sisterEach) { for(let i=1;i<=sisterCnt;i++) addRow(`বোন (${i} নং)`, shares.sisterEach); }
+
+  if(rows.length === 0) {
+    document.getElementById('result-content').innerHTML = `<div class="empty-state"><div class="empty-icon">⚠️</div><p style="font-size:15px;font-weight:600;margin-bottom:8px;">কোনো ওয়ারিশ নির্বাচন করা হয়নি</p><p style="font-size:13px;">অনুগ্রহ করে ওয়ারিশ ট্যাবে গিয়ে ওয়ারিশ নির্বাচন করুন</p></div>`;
+    showScreen('result'); return;
+  }
+
+  const size = 200, cx=100, cy=100, r=80;
+  let startAngle = -Math.PI/2, piePaths = '';
+  rows.forEach(row => {
+    const angle = row.shareRatio * 2 * Math.PI;
+    const endAngle = startAngle + angle;
+    const x1 = cx + r*Math.cos(startAngle), y1 = cy + r*Math.sin(startAngle);
+    const x2 = cx + r*Math.cos(endAngle), y2 = cy + r*Math.sin(endAngle);
+    piePaths += `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${angle>Math.PI?1:0},1 ${x2},${y2} Z" fill="${row.color}" stroke="white" stroke-width="2"/>`;
+    startAngle = endAngle;
+  });
+
+  const pieHTML = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${piePaths}<circle cx="${cx}" cy="${cy}" r="35" fill="white"/><text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="9" fill="#888">${toBanglaNum(rows.length)} জন</text><text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="8" fill="#888">ওয়ারিশ</text></svg>`;
+  const legendHTML = rows.map(r => `<div class="legend-item"><div class="legend-dot" style="background:${r.color}"></div><span>${r.label}</span></div>`).join('');
+  const tableRows = rows.map(r => `
+    <div class="result-row">
+      <div><div style="font-weight:600;font-size:14px;">${r.label}</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">${(r.shareRatio*100).toFixed(2)}% | ${toBanglaNum(r.landAmt.toFixed(2))} ${unit}</div></div>
+      <div style="text-align:right;">${totalVal>0?`<div style="font-weight:700;color:var(--green);font-size:15px;">${formatTaka(r.valAmt)}</div>`:''}<div style="margin-top:2px;"><span class="share-badge">${fraction(r.shareRatio,1)}</span></div></div>
+    </div>`).join('');
+
+  const deductHTML = deductions > 0 ? `<div class="section-title">কর্তনযোগ্য</div><div class="card">${funeral>0?`<div class="result-row"><span class="result-label">দাফন/কাফন খরচ</span><span class="result-value">${formatTaka(funeral)}</span></div>`:''}${debt>0?`<div class="result-row"><span class="result-label">ঋণ</span><span class="result-value">${formatTaka(debt)}</span></div>`:''}${wasiyah>0?`<div class="result-row"><span class="result-label">অসিয়ত</span><span class="result-value">${formatTaka(wasiyah)}</span></div>`:''}<div class="result-row"><span class="result-label" style="font-weight:600;">মোট কর্তন</span><span class="result-value highlight">${formatTaka(deductions)}</span></div></div>` : '';
+
+  document.getElementById('result-content').innerHTML = `
+    <div class="info-box" style="font-weight:600;">${decName}-এর সম্পত্তির বণ্টন</div>
+    <div class="summary-bar">
+      <div class="summary-item"><div class="val">${toBanglaNum(land.toFixed(2))} ${unit}</div><div class="lbl">মোট জমি</div></div>
+      <div class="summary-item"><div class="val">${formatTaka(netVal)}</div><div class="lbl">বিতরণযোগ্য</div></div>
+      <div class="summary-item"><div class="val">${toBanglaNum(rows.length)} জন</div><div class="lbl">ওয়ারিশ</div></div>
+    </div>
+    ${deductHTML}
+    <div class="section-title">ওয়ারিশদের অংশ</div>
+    <div class="pie-wrap">${pieHTML}</div>
+    <div class="legend">${legendHTML}</div>
+    <div class="result-card"><div class="result-header"><span>বিস্তারিত বণ্টন</span><span>${unit} | টাকা</span></div>${tableRows}</div>
+    <div class="warning-box">⚠️ এটি একটি আনুমানিক হিসাব। চূড়ান্ত সিদ্ধান্তের জন্য আলেম বা আইনজীবীর পরামর্শ নিন।</div>
+    <button class="btn btn-secondary" onclick="showScreen('input')">← নতুন হিসাব করুন</button>`;
+
+  showScreen('result');
+}
+</script>
+</body>
+</html>
